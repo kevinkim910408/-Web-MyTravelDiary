@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- OG Tag-->
+    <meta property="og:title" content="My Travel Diary"/>
+    <meta property="og:description" content="Remember the Memory of My Precious Time"/>
+    <meta property="og:image" content="https://i.ytimg.com/vi/GrALoOPk0lw/maxresdefault.jpg"/>
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <title>My Travel Diary</title>
+
+    <!-- File Upload -->
+    <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.js"></script>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Jua', sans-serif;
+        }
+
+        body {
+            background-color: #598987;
+        }
+
+        .flexTag-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .flexTag-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .posting-box {
+            width: 500px;
+            margin-top: 20px;
+        }
+
+        .wrap {
+            width: 900px;
+            margin: auto;
+        }
+
+        .jumbotron {
+            background-color: #77A88D;
+        }
+
+        .footer {
+            background-color: #77A88D;
+            width: 900px;
+            margin-top: 20px;
+            height: 30px;
+        }
+
+
+        .jumbotron > .container > h1 {
+            color: #FFF;
+        }
+
+        .container {
+            padding-left: 50px;
+        }
+
+        .card {
+            margin-top: 15px;
+        }
+
+        .info_text{
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 250px;
+            height: 20px;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            bsCustomFileInput.init();
+            listing();
+        })
+
+        function listing() {
+            $.ajax({
+                type: "GET",
+                url: "/diary?sample_give=샘플데이터",
+                data: {},
+                success: function (response) {
+                    let rows = response['contents']
+                    for (let i = 0; i < rows.length; ++i) {
+                        let cityName = rows[i]['City_Name']
+                        let reviews = rows[i]['Review']
+                        let file = rows[i]['file']
+                        let info = rows[i]['info']
+                        let url = rows[i]['url']
+
+                        console.log(url)
+
+                        let html_temp =  `<div class="card">
+                                            <div class="flexTag-row">
+                                                <a href="../static/${file}">
+                                                    <img src="../static/${file}" class="card-img-top" style="width: 550px;">
+                                                </a>
+                                                <div class="card-body">
+                                                    <h1 class="card-title">${cityName}</h1>
+                                                    <p class="card-text info_text" ><a href="${url}" target='_blank'>Information: ${info}</a></p>
+                                                    <p class="card-text">Comments: ${reviews}</p>
+                                                </div>
+                                            </div>
+                                        </div>`;
+                        $('#card-group').append(html_temp);
+                    }
+                }
+            })
+        }
+
+        function posting() {
+            let cityName = $('#cityName').val();
+            let myReview = $('#myReview').val();
+
+            // file을 가져와서 저장 // $('#file')[0] - html tag들을 가져옴, files[0] - 파일갯수를 가져옴(제일첫번째)
+            let file = $('#file')[0].files[0]
+            let form_data = new FormData()
+
+            // file이기 때문에 form_data를 사용해서 보내야한다.
+            form_data.append("file_give", file)
+            form_data.append("city_name_give", cityName)
+            form_data.append("my_review_give", myReview)
+
+            $.ajax({
+                type: "POST",
+                url: "/diary",
+                data: form_data,
+                // 아래 새줄은 default로 false를 준다고 생각하기 file 업로드때는
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    alert(response["msg"])
+                    window.location.reload()
+                }
+            });
+        }
+
+    </script>
+</head>
+<body>
+    <div class="wrap">
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container flexTag-column">
+                <h1>My Travel Diary</h1>
+                <div class="posting-box">
+                    <!-- 파일 업로드-->
+                    <div class="form-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file">
+                            <label class="custom-file-label" for="file">Choose file</label>
+                        </div>
+                    </div>
+                    <!-- 여기 까지 파일 업로드 html from bootstrap-->
+
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="cityName" placeholder="City Name" maxlength="15">
+                    </div>
+                    <div class="form-group">
+                            <textarea class="form-control" id="myReview" rows="3"
+                                      placeholder="My Review" maxlength="230"></textarea>
+                    </div>
+                </div>
+                <button onclick="posting();" type="button" class="btn btn-success" style="width: 200px;">S a v e</button>
+
+            </div>
+        </div>
+        <div id="card-group">
+
+        </div>
+        <div class="footer"></div>
+    </div>
+</body>
+</html>
